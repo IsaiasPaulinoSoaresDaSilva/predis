@@ -6,8 +6,8 @@ Este guia descreve os passos necessários para configurar o ambiente de desenvol
 
 Antes de começar, garanta que você tenha os seguintes softwares instalados em seu sistema:
 
-1.  **Python:** Versão 3.8 ou superior. Você pode verificar sua versão com `python3 --version`.
-2.  **Node.js e npm:** Versão 16 ou superior. Você pode verificar sua versão com `node -v` e `npm -v`.
+1.  **Python:** Versão 3.10 ou superior. Você pode verificar sua versão com `python3 --version`.
+2.  **Node.js e npm:** Versão 20 ou superior (exigido pela suíte de testes, vitest). Você pode verificar sua versão com `node -v` e `npm -v`.
 3.  **pip:** O gerenciador de pacotes do Python, geralmente instalado junto com o Python.
 
 ## Passo a Passo

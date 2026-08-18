@@ -1,11 +1,12 @@
 <template>
   <aside class="sidebar">
     <div class="sidebar-header">
-      <h3>Regiões</h3>
+      <h3>Regiões de SJC</h3>
+      <p class="sidebar-subtitle">Estudo de caso: São José dos Campos</p>
     </div>
     <ul class="region-list">
-      <li 
-        v-for="region in regions" 
+      <li
+        v-for="region in regions"
         :key="region.id"
         class="region-item"
         :class="{ active: region.id === selectedRegion }"
@@ -27,31 +28,39 @@ defineProps({
 defineEmits(['region-selected']);
 
 const regions = ref([
-  { id: 'sul', name: 'Região Sul' },
-  { id: 'sudeste', name: 'Região Sudeste' },
-  { id: 'centro-oeste', name: 'Região Centro-Oeste' },
-  { id: 'nordeste', name: 'Região Nordeste' },
-  { id: 'norte', name: 'Região Norte' },
+  { id: 'centro', name: 'Centro' },
+  { id: 'norte', name: 'Norte' },
+  { id: 'sul', name: 'Sul' },
+  { id: 'leste', name: 'Leste' },
+  { id: 'oeste', name: 'Oeste' },
+  { id: 'sudeste', name: 'Sudeste' },
 ]);
 
 </script>
 
 <style scoped>
 .sidebar {
-  width: 250px;
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-right: 1px solid #e0e0e0;
+  width: 230px;
+  background-color: var(--surface);
+  padding: 1.5rem 1rem;
+  border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
 }
 
 .sidebar-header h3 {
-  margin: 0 0 1rem 0;
-  color: var(--primary-green, #007A33);
+  margin: 0 0 0.25rem 0;
+  color: var(--river-dark);
   font-weight: 700;
-  border-bottom: 2px solid var(--primary-green, #007A33);
+  font-size: 1rem;
   padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--river);
+}
+
+.sidebar-subtitle {
+  margin: 0.5rem 0 1.25rem 0;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
 }
 
 .region-list {
@@ -61,21 +70,53 @@ const regions = ref([
 }
 
 .region-item {
-  padding: 0.8rem 1rem;
-  margin-bottom: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.35rem;
   border-radius: 6px;
+  border-left: 3px solid transparent;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
   font-weight: 500;
+  font-size: 0.92rem;
+  color: var(--ink);
 }
 
 .region-item:hover {
-  background-color: #f0f0f0;
+  background-color: var(--surface-sunken);
 }
 
 .region-item.active {
-  background-color: var(--primary-green, #007A33);
-  color: #ffffff;
+  background-color: var(--river-tint);
+  border-left-color: var(--river);
+  color: var(--river-dark);
   font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding: 1rem;
+  }
+  .sidebar-header { display: none; }
+  .region-list {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  .region-item {
+    margin-bottom: 0;
+    white-space: nowrap;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 6px 6px 0 0;
+  }
+  .region-item.active {
+    border-left-color: transparent;
+    border-bottom-color: var(--river);
+  }
 }
 </style>

@@ -1,13 +1,23 @@
+import time
 import pandas as pd
 import httpx
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 from backend.connectors.base_connector import BaseConnector
 
 class OpenMeteoConnector(BaseConnector):
     """
     Conector para buscar dados de previsão do tempo da API Open-Meteo.
+
+    Inclui um cache em memória com TTL: o dashboard consulta `/predict` a
+    cada ~10s por região selecionada, mas a previsão de chuva não muda nesse
+    ritmo — sem cache, cada atualização do dashboard bateria a API pública
+    de novo, sem necessidade (ver IMPLEMENTATION_PLAN.md, Fase 3).
     """
     API_URL = "https://api.open-meteo.com/v1/forecast"
+    CACHE_TTL_SECONDS = 600  # 10 minutos
+
+    def __init__(self):
+        self._cache: Dict[Tuple[float, float], Tuple[float, pd.DataFrame]] = {}
 
     def get_data(self, station_id: str = None, **kwargs: Any) -> pd.DataFrame:
         """
@@ -27,6 +37,14 @@ class OpenMeteoConnector(BaseConnector):
         if not latitude or not longitude:
             raise ValueError("Latitude e Longitude são necessárias para o OpenMeteoConnector.")
 
+        cache_key = (round(float(latitude), 3), round(float(longitude), 3))
+        cached = self._cache.get(cache_key)
+        if cached is not None:
+            cached_at, cached_df = cached
+            if time.monotonic() - cached_at < self.CACHE_TTL_SECONDS:
+                print(f"INFO: [OpenMeteoConnector] Usando cache para Lat: {latitude}, Lon: {longitude}")
+                return cached_df.copy()
+
         params = {
             "latitude": latitude,
             "longitude": longitude,
@@ -36,7 +54,7 @@ class OpenMeteoConnector(BaseConnector):
         }
 
         try:
-            with httpx.Client() as client:
+            with httpx.Client(timeout=10.0) as client:
                 response = client.get(self.API_URL, params=params)
                 response.raise_for_status() # Lança um erro para status HTTP 4xx/5xx
                 data = response.json()
@@ -45,20 +63,26 @@ class OpenMeteoConnector(BaseConnector):
             daily_data = data['daily']
             df = pd.DataFrame(daily_data)
             df.rename(columns={'time': 'data', 'precipitation_sum': 'previsao_chuva_mm'}, inplace=True)
-            
+
             # Converter a data para o mesmo formato dos outros conectores
             df['data'] = pd.to_datetime(df['data'])
-            
+
             # Pivotar o DataFrame para ter previsões em colunas (d+1, d+2, d+3)
             # Esta lógica é um pouco mais complexa, pois a API retorna em linhas.
             # Para o nosso modelo, é mais fácil ter colunas de features.
             # Por simplicidade aqui, vamos apenas retornar os dados como estão
             # e a lógica de engenharia de features no `model.py` irá processá-los.
             print(f"INFO: [OpenMeteoConnector] Dados de previsão obtidos para Lat: {latitude}, Lon: {longitude}")
-            return df
+            self._cache[cache_key] = (time.monotonic(), df)
+            return df.copy()
 
         except httpx.HTTPStatusError as e:
             print(f"ERRO: [OpenMeteoConnector] Erro na API Open-Meteo: {e}")
+            return pd.DataFrame()
+        except httpx.RequestError as e:
+            # Falha de rede/timeout: não derruba o app, apenas fica sem previsão
+            # (DataManager já lida com forecast_data vazio preenchendo 0).
+            print(f"ERRO: [OpenMeteoConnector] Falha de rede ao consultar a Open-Meteo: {e}")
             return pd.DataFrame()
         except Exception as e:
             print(f"ERRO: [OpenMeteoConnector] Erro inesperado: {e}")

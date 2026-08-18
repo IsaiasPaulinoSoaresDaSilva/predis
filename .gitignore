@@ -16,6 +16,8 @@ build/
 *.so
 *.log
 disaster_model.joblib
+predis.db
+backend/data/
 
 # Node
 node_modules/

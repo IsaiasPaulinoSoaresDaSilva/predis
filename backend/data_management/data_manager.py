@@ -1,5 +1,5 @@
 import pandas as pd
-from backend.connectors.inmet_connector import INMETConnector
+from backend.connectors.precipitation_connector import PrecipitationConnector
 from backend.connectors.ana_connector import ANAConnector
 from backend.connectors.openmeteo_connector import OpenMeteoConnector
 from functools import reduce
@@ -8,37 +8,58 @@ class DataManager:
     """
     Orquestra múltiplos conectores de dados para buscar, unir e
     fornecer um conjunto de dados coeso para a aplicação.
+
+    Estudo de caso: São José dos Campos (SP). As regiões abaixo correspondem
+    à divisão administrativa real do município (Centro, Norte, Sul, Leste,
+    Oeste, Sudeste — ver Prefeitura de SJC / IBGE), cada uma com suas
+    coordenadas reais. A precipitação vem da Open-Meteo Archive (real, por
+    coordenada — ver `PrecipitationConnector`) e o nível de rio é derivado
+    da única estação telemétrica real da ANA dentro do município (ver
+    `ANAConnector`), com fallback para `backend/historical_data/<região>.csv`
+    se as APIs estiverem indisponíveis. Ver frontend/src/assets/sjc-regions.json
+    para o contexto geográfico (bairros de referência e curso d'água) de
+    cada região.
     """
     def __init__(self):
         self.connectors = {
-            'inmet': INMETConnector(),
+            'precipitation': PrecipitationConnector(),
             'ana': ANAConnector(),
             'openmeteo': OpenMeteoConnector(),
         }
-        
+
+        # lat/lon: coordenadas reais (aproximadas ao centro de cada região),
+        # usadas tanto pela previsão (Open-Meteo forecast) quanto pelo
+        # histórico real de chuva (Open-Meteo Archive).
+        # csv_region: identificador usado por AMBOS os conectores para o
+        # fallback em CSV local (backend/historical_data/<csv_region>.csv)
+        # quando a busca real (Open-Meteo Archive / ANA) falha ou a região
+        # é desconhecida — sempre resolvido para uma das 6 regiões reais.
         self.location_map = {
-            'sul': {'inmet_station': 'A801', 'ana_station': '87654321', 'lat': -27.59, 'lon': -48.54},
-            'sudeste': {'inmet_station': 'A701', 'ana_station': '12345678', 'lat': -22.90, 'lon': -43.17},
-            'centro-oeste': {'inmet_station': 'A901', 'ana_station': '23456789', 'lat': -15.78, 'lon': -47.92},
-            'nordeste': {'inmet_station': 'A401', 'ana_station': '34567890', 'lat': -12.97, 'lon': -38.51},
-            'norte': {'inmet_station': 'A101', 'ana_station': '45678901', 'lat': -3.11, 'lon': -60.02},
-            'default': {'inmet_station': 'DEFAULT', 'ana_station': 'DEFAULT', 'lat': -14.23, 'lon': -51.92},
+            'centro':   {'csv_region': 'centro',   'lat': -23.1794, 'lon': -45.8869},
+            'norte':    {'csv_region': 'norte',    'lat': -23.1300, 'lon': -45.8900},
+            'sul':      {'csv_region': 'sul',      'lat': -23.2300, 'lon': -45.8900},
+            'leste':    {'csv_region': 'leste',    'lat': -23.1900, 'lon': -45.8100},
+            'oeste':    {'csv_region': 'oeste',    'lat': -23.1900, 'lon': -45.9500},
+            'sudeste':  {'csv_region': 'sudeste',  'lat': -23.2300, 'lon': -45.8100},
+            'default':  {'csv_region': 'centro',   'lat': -23.1794, 'lon': -45.8869},
         }
 
     def get_combined_data(self, region_id: str) -> pd.DataFrame:
         location_info = self.location_map.get(region_id.lower(), self.location_map['default'])
-        
+        csv_region = location_info['csv_region']
+
         # --- 1. Buscar Dados Históricos ---
         historical_dfs = []
-        for source in ['inmet', 'ana']:
-            connector = self.connectors[source]
-            station_key = f"{source}_station"
-            if station_key in location_info:
-                station_id = location_info[station_key]
-                df = connector.get_data(station_id=station_id)
-                if not df.empty:
-                    historical_dfs.append(df)
-        
+        precip_df = self.connectors['precipitation'].get_data(
+            station_id=csv_region, latitude=location_info['lat'], longitude=location_info['lon']
+        )
+        if not precip_df.empty:
+            historical_dfs.append(precip_df)
+
+        ana_df = self.connectors['ana'].get_data(station_id=csv_region)
+        if not ana_df.empty:
+            historical_dfs.append(ana_df)
+
         if not historical_dfs:
             return pd.DataFrame()
 
@@ -48,7 +69,7 @@ class DataManager:
         # --- 2. Buscar Dados de Previsão ---
         forecast_connector = self.connectors['openmeteo']
         forecast_data = forecast_connector.get_data(latitude=location_info['lat'], longitude=location_info['lon'])
-        
+
         if forecast_data.empty:
             # Se a API de previsão falhar, continuamos apenas com os dados históricos
             # e preenchemos as colunas de previsão com 0.

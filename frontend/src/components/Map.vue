@@ -8,7 +8,7 @@
 import { onMounted, onBeforeUnmount, watch } from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import regionsGeoJSON from '../assets/brazil-regions.json';
+import regionsGeoJSON from '../assets/sjc-regions.json';
 
 const props = defineProps({
   selectedRegion: String
@@ -20,23 +20,26 @@ let geoJsonLayer = null;
 
 // --- Estilos do Mapa ---
 const defaultStyle = {
-  color: "#007A33",
+  color: "#1F7A6C",
   weight: 2,
   opacity: 0.8,
-  fillColor: "#007A33",
-  fillOpacity: 0.2
+  fillColor: "#1F7A6C",
+  fillOpacity: 0.18
 };
 
 const hoverStyle = {
-  fillColor: "#007A33",
-  fillOpacity: 0.5,
+  fillColor: "#1F7A6C",
+  fillOpacity: 0.45,
   weight: 3,
 };
 
+// Nota: propositalmente NÃO usamos as cores de risco (teal/âmbar/tijolo)
+// aqui — a seleção no mapa é neutra, para não sugerir visualmente que a
+// região selecionada tem um nível de risco específico.
 const selectedStyle = {
-  fillColor: "#007A33",
-  fillOpacity: 0.7,
-  color: "#004d20",
+  fillColor: "#1B2B27",
+  fillOpacity: 0.35,
+  color: "#1B2B27",
   weight: 4,
 };
 
@@ -44,6 +47,15 @@ const selectedStyle = {
 // --- Funções do Mapa ---
 
 function onEachFeature(feature, layer) {
+  const props = feature.properties;
+  const bairros = (props.bairros_referencia || []).join(', ');
+  layer.bindPopup(`
+    <strong>${props.nome}</strong><br/>
+    <em>Bairros de referência:</em> ${bairros}<br/>
+    <em>Curso d'água:</em> ${props.curso_dagua || '—'}<br/>
+    <em>Histórico:</em> ${props.historico_risco || '—'}
+  `);
+
   layer.on({
     mouseover: (e) => {
       const l = e.target;
@@ -80,7 +92,7 @@ onMounted(() => {
   map = L.map('leaflet-map', {
     zoomControl: false,
     attributionControl: false
-  }).setView([-14.2350, -51.9253], 4); // Centro do Brasil
+  }).setView([-23.1794, -45.8869], 11); // Centro de São José dos Campos (SP)
 
   geoJsonLayer = L.geoJSON(regionsGeoJSON, {
     style: defaultStyle,
@@ -113,8 +125,8 @@ watch(() => props.selectedRegion, (newRegionId) => {
 
 #leaflet-map {
   width: 100%;
-  height: 100%; 
+  height: 100%;
   min-height: 350px; /* Altura mínima para o mapa ser visível */
-  background-color: #aadaff; /* Cor de "oceano" */
+  background-color: #DCE9E4; /* Cor de "oceano", alinhada à paleta */
 }
 </style>

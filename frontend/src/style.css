@@ -1,37 +1,105 @@
-/* Estilos Globais e Variáveis de Cor */
+/* PreDis — Design system
+   ------------------------------------------------------------------
+   Identidade visual: "painel de instrumento hidrológico" — inspirada
+   em réguas linimétricas (marcos de nível de rio reais, pintados em
+   faixas), pluviógrafos e mapas topográficos usados por estações da
+   ANA/INMET de verdade. Paleta terra + água, tipografia técnica.
+   Ver IMPLEMENTATION_PLAN.md (Fase 6 — redesign) para o racional. */
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --main-bg-color: #f4f6f8;
-  --card-bg-color: #ffffff;
-  --text-color: #333;
-  --primary-green: #007A33;
-  --shadow-color: rgba(0, 0, 0, 0.05);
-  --risk-color: green; /* Cor padrão de risco */
-  --pulse-duration: 2s; /* Duração padrão da pulsação */
+  /* Superfícies */
+  --bg: #F2EEE3;
+  --surface: #FFFFFF;
+  --surface-sunken: #EAE4D3;
+  --line: #DCD3BC;
+
+  /* Texto */
+  --ink: #1B2B27;
+  --ink-soft: #5B685F;
+  --ink-faint: #8B9389;
+
+  /* Marca + risco (semânticas: teal=baixo, âmbar=moderado, tijolo=alto) */
+  --river: #1F7A6C;
+  --river-dark: #14524A;
+  --river-tint: rgba(31, 122, 108, 0.12);
+  --amber: #C98A2E;
+  --amber-tint: rgba(201, 138, 46, 0.14);
+  --brick: #B6402E;
+  --brick-tint: rgba(182, 64, 46, 0.13);
+
+  /* Compat: nome antigo usado em componentes ainda não migrados */
+  --main-bg-color: var(--bg);
+  --card-bg-color: var(--surface);
+  --text-color: var(--ink);
+  --primary-green: var(--river);
+  --shadow-color: rgba(27, 43, 39, 0.08);
+  --risk-color: var(--river);
+  --pulse-duration: 2s;
+
+  /* Tipografia */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  font-family: 'Roboto', sans-serif;
-  background-color: var(--main-bg-color);
-  color: var(--text-color);
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  color: var(--ink);
   margin: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Keyframe de pulsação global */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Chip de risco reutilizável (baixo/moderado/alto) */
+.risk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.risk-chip::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.risk-chip--0 { color: var(--river-dark); background: var(--river-tint); }
+.risk-chip--1 { color: #8A5B1C; background: var(--amber-tint); }
+.risk-chip--2 { color: var(--brick); background: var(--brick-tint); }
+
+/* Keyframe de pulsação global (usado pelo indicador de status ao vivo) */
 @keyframes pulse {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(0, 122, 51, 0.4);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 15px rgba(0, 122, 51, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(0, 122, 51, 0);
-  }
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(31, 122, 108, 0.4); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(31, 122, 108, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(31, 122, 108, 0); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

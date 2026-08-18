@@ -1,0 +1,130 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "municipio": "São José dos Campos",
+    "uf": "SP",
+    "nota": "Geometria simplificada/esquemática para fins de demonstração do estudo de caso PreDis — não é um levantamento cartográfico oficial dos limites de bairros. As 6 regiões seguem a divisão administrativa real da Prefeitura de São José dos Campos (Centro, Norte, Sul, Leste, Oeste, Sudeste)."
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "centro",
+        "nome": "Centro",
+        "bairros_referencia": ["Centro", "Vila Adyana", "Jardim Satélite"],
+        "curso_dagua": "Rio Paraíba do Sul (canal principal)",
+        "historico_risco": "Alagamentos pontuais em vias como Av. José Longo e Av. São João em chuvas fortes."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-45.912, -23.160],
+          [-45.862, -23.160],
+          [-45.862, -23.200],
+          [-45.912, -23.200],
+          [-45.912, -23.160]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "norte",
+        "nome": "Norte",
+        "bairros_referencia": ["Jardim Satélite (porção norte)", "Distrito de São Francisco Xavier"],
+        "curso_dagua": "Represa/Rio Jaguari (afluente do Paraíba do Sul)",
+        "historico_risco": "Histórico de alagamento urbano menos reportado que nas regiões Leste e Sul; área inclui trecho represado do Rio Jaguari."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-45.930, -23.100],
+          [-45.850, -23.100],
+          [-45.850, -23.160],
+          [-45.930, -23.160],
+          [-45.930, -23.100]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sul",
+        "nome": "Sul",
+        "bairros_referencia": ["Parque Interlagos", "Jardim São Judas Tadeu"],
+        "curso_dagua": "Córregos afluentes do Paraíba do Sul (zona sul)",
+        "historico_risco": "Um dos pontos mais citados em reportagens de alagamento na cidade, com vias como Ubirajara Raimundo de Souza e Av. Nicanor Reis afetadas recorrentemente."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-45.912, -23.200],
+          [-45.850, -23.200],
+          [-45.850, -23.260],
+          [-45.912, -23.260],
+          [-45.912, -23.200]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "leste",
+        "nome": "Leste",
+        "bairros_referencia": ["Jardim Nova Detroit", "Monte Castelo", "Novo Horizonte", "Santa Maria"],
+        "curso_dagua": "Rio Comprido / Ribeirão Vidoca",
+        "historico_risco": "Região mais populosa da cidade e com os relatos mais graves de alagamento (água atingindo ~1m em residências próximas ao Rio Comprido/Pararangaba)."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-45.862, -23.160],
+          [-45.780, -23.160],
+          [-45.780, -23.220],
+          [-45.862, -23.220],
+          [-45.862, -23.160]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "oeste",
+        "nome": "Oeste",
+        "bairros_referencia": ["Urbanova", "Jardim das Colinas"],
+        "curso_dagua": "Córregos afluentes menores, divisa com Caçapava",
+        "historico_risco": "Menor histórico de alagamento reportado na imprensa local em relação às regiões Sul e Leste."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-45.980, -23.160],
+          [-45.912, -23.160],
+          [-45.912, -23.220],
+          [-45.980, -23.220],
+          [-45.980, -23.160]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sudeste",
+        "nome": "Sudeste",
+        "bairros_referencia": ["Jardim Morumbi", "Torrão de Ouro"],
+        "curso_dagua": "Córregos afluentes do Paraíba do Sul (zona sudeste), divisa com Jacareí",
+        "historico_risco": "Risco moderado, com registros pontuais de alagamento em cruzamentos como o do Jardim Morumbi."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-45.862, -23.220],
+          [-45.780, -23.220],
+          [-45.780, -23.260],
+          [-45.862, -23.260],
+          [-45.862, -23.220]
+        ]]
+      }
+    }
+  ]
+}
