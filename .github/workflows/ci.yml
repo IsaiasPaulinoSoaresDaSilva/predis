@@ -37,7 +37,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          # Node 18 falhava aqui ("Missing: @esbuild/... from lock file") —
+          # o lockfile foi gerado com npm 11, incompatível com o npm mais
+          # antigo do Node 18. Node 24 é a mesma versão já validada em
+          # frontend/Dockerfile para o mesmo problema.
+          node-version: "24"
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
